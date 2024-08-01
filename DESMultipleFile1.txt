@@ -1,0 +1,89 @@
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.stream.Collectors;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+public class DESMultipleFile {
+
+    public static void main(String[] args) throws Exception {
+        // Generate a secret key for DES encryption
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("DES");
+        //des secret key is sectetKey
+        SecretKey secretKey = keyGenerator.generateKey();
+        System.out.println(Arrays.toString(secretKey.getEncoded()));
+        // Declare an object  of the class Cipher for "DES"(Create a DES cipher instance)
+
+        Cipher cipher = Cipher.getInstance("DES");
+
+        // Initialize the cipher for encryption using the secret key
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey); 
+
+        String[] filenames = new String[] {"file1.txt","file2.txt","file3.txt","file4.txt","file5.txt", "file6.txt", "file7.txt","file8.txt","file9.txt", "file10.txt","file11.txt", "file12.txt", "file13.txt","file14.txt","file15.txt"};
+
+        for (String filename : filenames) {
+            long start = System.currentTimeMillis();
+            
+            // Plaintext to be encrypted
+            //String plaintext = "Hello, DES Encryption!"; 
+            try (BufferedReader reader = new BufferedReader(new FileReader(filename)); BufferedWriter writer = new BufferedWriter(new FileWriter("encrypted-des-" + filename))) {
+                String input = reader.lines().collect(Collectors.joining("\n"));
+                // Encrypt the plaintext
+                byte[] encryptedBytes = cipher.doFinal(input.getBytes());
+
+                // Encode the encrypted bytes to Base64 for readability
+                String encryptedText = Base64.getEncoder().encodeToString(encryptedBytes);
+
+                writer.write(encryptedText);
+
+            } catch (Exception ex) {
+            }
+            
+            System.out.println(filename + "\t" + (System.currentTimeMillis() - start) / 1000d + " seconds");
+        }
+    }
+
+    //}
+    public static void main2() throws Exception {
+        SecretKey secretKey = new SecretKeySpec(new byte[]{-33, 2, 38, 19, -53, 124, -12, -104}, "DES");
+
+        // Declare an object  of the class Cipher for "DES"(Create a DES cipher instance)
+        Cipher cipher = Cipher.getInstance("DES");
+
+        // Initialize the cipher for encryption using the secret key
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        String[] filenames = new String[] {"encrypted-des-file1.txt", "encrypted-des-file2.txt", "encrypted-des-file3.txt","encrypted-des-file4.txt", "encrypted-des-file5.txt", "encrypted-des-file6.txt","encrypted-des-file7.txt", "encrypted-des-file8.txt", "encrypted-des-file9.txt","encrypted-des-file10.txt", "encrypted-des-file11.txt","encrypted-des-file12.txt", "encrypted-des-file13.txt", "encrypted-des-file14.txt","encrypted-des-file15.txt" };
+        for (String filename : filenames) {
+        long start = System.currentTimeMillis();
+        // Plaintext to be encrypted
+        //String plaintext = "Hello, DES Encryption!"; 
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename)); BufferedWriter writer = new BufferedWriter(new FileWriter("decrypted-des-" + filename ))) {
+            String input = reader.lines().collect(Collectors.joining("\n"));
+            // Decrypt the encrypted bytes
+            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(input));
+
+            // Convert the decrypted bytes back to plaintext
+            String decryptedText = new String(decryptedBytes);
+            //System.out.println(decryptedText);
+
+            //FileOutputStream fos = new FileOutputStream(file);
+            //String []textToBeWritten = ("Decrypted Text (DES): " + decryptedText);
+            writer.write(decryptedText);
+
+        }
+        catch (Exception ex)
+        {
+        }
+        System.out.println(filename + "\t" + (System.currentTimeMillis() - start) / 1000d + " seconds");
+    }
+}
+}
+
+
